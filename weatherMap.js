@@ -14,7 +14,7 @@ const MAP_CONFIG = {
 };
 
 // OpenWeatherMap API Key
-const OWM_API_KEY = '56557251d5db2189c685db5c677e77a9';
+const OWM_API_KEY = CONFIG.OPENWEATHER_API_KEY;
 
 // Weather Map Layers
 const WEATHER_LAYERS = {
