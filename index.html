@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherWise - AI-Powered Weather Forecast</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS for interactive maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <i class="fas fa-cloud-sun"></i>
+            <span data-translate="appName">WeatherWise</span>
+        </div>
+        <nav class="nav-controls">
+            <div class="search-container">
+                <div class="search-input-wrapper">
+                    <input type="text" id="citySearch" data-translate-placeholder="searchPlaceholder" placeholder="Search city..." autocomplete="off">
+                    <div class="suggestions-container" id="suggestionsContainer">
+                        <ul class="suggestions-list" id="suggestionsList"></ul>
+                    </div>
+                </div>
+                <button id="searchBtn" class="btn-icon" title="Search">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button id="voiceSearchBtn" class="btn-icon" title="Voice Search">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button id="locationBtn" class="btn-icon" title="Use my location">
+                    <i class="fas fa-location-crosshairs"></i>
+                </button>
+            </div>
+            <div class="controls">
+                <select id="languageSelect" class="select-styled">
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="hi">हिंदी</option>
+                    <option value="ta">தமிழ்</option>
+                    <option value="zh">中文</option>
+                    <option value="ar">العربية</option>
+                    <option value="pt">Português</option>
+                    <option value="ja">日本語</option>
+                </select>
+                <button id="themeToggle" class="btn-icon" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <!-- User Profile Section -->
+                <div class="user-profile-section" id="userProfileSection">
+                    <button class="btn-icon user-avatar" id="userAvatarBtn" title="Account">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header" id="userDropdownHeader">
+                            <i class="fas fa-user-circle user-icon-large"></i>
+                            <span id="userDisplayName">Guest</span>
+                        </div>
+                        <div class="dropdown-menu">
+                            <a href="auth.html" class="dropdown-item" id="loginBtn">
+                                <i class="fas fa-sign-in-alt"></i> 
+                                <span data-translate="login">Login</span>
+                            </a>
+                            <a href="auth.html" class="dropdown-item" id="signupBtn">
+                                <i class="fas fa-user-plus"></i> 
+                                <span data-translate="signup">Sign Up</span>
+                            </a>
+                            <button class="dropdown-item" id="logoutBtn" style="display: none;">
+                                <i class="fas fa-sign-out-alt"></i> 
+                                <span data-translate="logout">Logout</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Current Weather Card -->
+        <section class="current-weather-section">
+            <div class="current-weather-card glass-card">
+                <div class="weather-main">
+                    <div class="location-info">
+                        <h1 id="cityName">Loading...</h1>
+                        <p id="currentDate" class="date"></p>
+                    </div>
+                    <div class="temperature-display">
+                        <img id="weatherIcon" src="" alt="Weather" class="weather-icon-large">
+                        <div class="temp-info">
+                            <span id="currentTemp" class="temp-large">--°</span>
+                            <span id="weatherDescription" class="weather-desc">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="weather-details">
+                    <div class="detail-item">
+                        <i class="fas fa-temperature-half"></i>
+                        <span data-translate="feelsLike">Feels Like</span>
+                        <strong id="feelsLike">--°</strong>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-droplet"></i>
+                        <span data-translate="humidity">Humidity</span>
+                        <strong id="humidity">--%</strong>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-wind"></i>
+                        <span data-translate="wind">Wind</span>
+                        <strong id="windSpeed">-- km/h</strong>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-eye"></i>
+                        <span data-translate="visibility">Visibility</span>
+                        <strong id="visibility">-- km</strong>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-gauge-high"></i>
+                        <span data-translate="pressure">Pressure</span>
+                        <strong id="pressure">-- hPa</strong>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-sun"></i>
+                        <span data-translate="uvIndex">UV Index</span>
+                        <strong id="uvIndex">--</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sun & Moon Info -->
+            <div class="sun-moon-card glass-card">
+                <h3><i class="fas fa-sun"></i> <span data-translate="sunMoon">Sun & Moon</span></h3>
+                <div class="sun-moon-info">
+                    <div class="sun-info">
+                        <div class="info-row">
+                            <i class="fas fa-sunrise"></i>
+                            <span data-translate="sunrise">Sunrise</span>
+                            <strong id="sunrise">--:--</strong>
+                        </div>
+                        <div class="info-row">
+                            <i class="fas fa-sunset"></i>
+                            <span data-translate="sunset">Sunset</span>
+                            <strong id="sunset">--:--</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7-Day Forecast -->
+        <section class="forecast-section">
+            <div class="section-header">
+                <h2><i class="fas fa-calendar-week"></i> <span data-translate="sixDayForecast">6-Day Forecast</span></h2>
+            </div>
+            <div class="forecast-cards" id="weeklyForecast">
+                <!-- Forecast cards will be dynamically generated -->
+            </div>
+        </section>
+
+        <!-- Hourly Forecast -->
+        <section class="hourly-section">
+            <div class="section-header">
+                <h2><i class="fas fa-clock"></i> <span data-translate="hourlyForecast">24-Hour Forecast</span></h2>
+            </div>
+            <div class="hourly-scroll" id="hourlyForecast">
+                <!-- Hourly forecast will be dynamically generated -->
+            </div>
+        </section>
+
+        <!-- Monthly Weather Report -->
+        <section class="monthly-section">
+            <div class="section-header">
+                <h2><i class="fas fa-calendar-days"></i> <span data-translate="monthlyReport">Monthly Weather Report</span></h2>
+                <div class="month-nav">
+                    <button id="prevMonth" class="btn-icon"><i class="fas fa-chevron-left"></i></button>
+                    <span id="currentMonth">--</span>
+                    <button id="nextMonth" class="btn-icon"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="monthly-calendar" id="monthlyCalendar">
+                <!-- Monthly calendar will be dynamically generated -->
+            </div>
+            <div class="monthly-summary glass-card">
+                <h3 data-translate="monthlySummary">Monthly Summary</h3>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-temperature-high"></i>
+                        <span data-translate="avgHighTemp">Avg High</span>
+                        <strong id="avgHighTemp">--°</strong>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-temperature-low"></i>
+                        <span data-translate="avgLowTemp">Avg Low</span>
+                        <strong id="avgLowTemp">--°</strong>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-cloud-rain"></i>
+                        <span data-translate="rainyDays">Rainy Days</span>
+                        <strong id="rainyDays">--</strong>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-sun"></i>
+                        <span data-translate="sunnyDays">Sunny Days</span>
+                        <strong id="sunnyDays">--</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Weather Prediction -->
+        <section class="ai-prediction-section">
+            <div class="section-header">
+                <h2><i class="fas fa-robot"></i> <span data-translate="aiPrediction">AI Weather Prediction</span></h2>
+            </div>
+            <div class="ai-prediction-card glass-card">
+                <div class="ai-header">
+                    <div class="ai-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="ai-title">
+                        <h3 data-translate="aiInsights">AI Weather Insights</h3>
+                        <p data-translate="aiSubtitle">Powered by advanced weather analysis</p>
+                    </div>
+                </div>
+                <div class="ai-content" id="aiPredictionContent">
+                    <div class="prediction-item">
+                        <h4><i class="fas fa-calendar-plus"></i> <span data-translate="extendedForecast">Extended Forecast (2 Weeks)</span></h4>
+                        <div id="extendedForecast" class="extended-forecast-grid">
+                            <!-- Extended forecast will be generated -->
+                        </div>
+                    </div>
+                    <div class="prediction-item">
+                        <h4><i class="fas fa-lightbulb"></i> <span data-translate="weatherTrends">Weather Trends & Analysis</span></h4>
+                        <p id="weatherTrends" class="ai-analysis">Analyzing weather patterns...</p>
+                    </div>
+                    <div class="prediction-item">
+                        <h4><i class="fas fa-triangle-exclamation"></i> <span data-translate="weatherAlerts">Weather Alerts</span></h4>
+                        <div id="weatherAlerts" class="alerts-container">
+                            <p data-translate="noAlerts">No weather alerts at this time.</p>
+                        </div>
+                    </div>
+                    <div class="prediction-item">
+                        <h4><i class="fas fa-shirt"></i> <span data-translate="recommendations">Recommendations</span></h4>
+                        <div id="aiRecommendations" class="recommendations-list">
+                            <!-- Recommendations will be generated -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Weather Maps -->
+        <section class="maps-section">
+            <div class="section-header">
+                <h2><i class="fas fa-map"></i> <span data-translate="weatherMaps">Weather Maps</span></h2>
+            </div>
+            <div class="weather-map-wrapper glass-card">
+                <!-- Map Controls -->
+                <div class="map-controls-bar">
+                    <div class="map-search">
+                        <div class="map-search-input-wrapper">
+                            <input type="text" id="mapSearchInput" placeholder="Search location on map..." class="map-search-input" autocomplete="off">
+                            <div class="map-suggestions-container" id="mapSuggestionsContainer">
+                                <ul class="suggestions-list" id="mapSuggestionsList"></ul>
+                            </div>
+                        </div>
+                        <button class="map-search-btn" onclick="searchLocation(document.getElementById('mapSearchInput').value)">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="map-actions">
+                        <button class="map-action-btn" onclick="recenterMap()" title="My Location">
+                            <i class="fas fa-crosshairs"></i>
+                        </button>
+                        <button class="map-action-btn" onclick="toggleMapFullscreen()" title="Fullscreen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Weather Layer Controls -->
+                <div class="map-layer-controls" id="mapLayerControls">
+                    <!-- Layer buttons will be generated by JavaScript -->
+                </div>
+                
+                <!-- Map Style Toggle -->
+                <div class="map-style-toggle">
+                    <button class="map-style-btn active" data-style="standard" onclick="changeMapStyle('standard')">
+                        <i class="fas fa-map"></i> Standard
+                    </button>
+                    <button class="map-style-btn" data-style="satellite" onclick="changeMapStyle('satellite')">
+                        <i class="fas fa-satellite"></i> Satellite
+                    </button>
+                    <button class="map-style-btn" data-style="dark" onclick="changeMapStyle('dark')">
+                        <i class="fas fa-moon"></i> Dark
+                    </button>
+                </div>
+                
+                <!-- Interactive Map Container -->
+                <div id="weatherMapContainer" class="interactive-map"></div>
+                
+                <!-- Map Legend -->
+                <div class="map-legend" id="mapLegend">
+                    <!-- Legend will be generated by JavaScript -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- AI Chatbot -->
+    <div class="chatbot-container" id="chatbotContainer">
+        <div class="chatbot-tooltip" id="chatbotTooltip">
+            <div class="tooltip-title"><i class="fas fa-robot"></i> AI Weather Assistant</div>
+            <div class="tooltip-desc" data-translate="chatbotTooltipDesc">Ask me about weather forecasts, conditions, and clothing advice. I support 10 languages!</div>
+            <div class="tooltip-languages">
+                <span class="lang-tag">English</span>
+                <span class="lang-tag">Español</span>
+                <span class="lang-tag">Français</span>
+                <span class="lang-tag">Deutsch</span>
+                <span class="lang-tag">हिंदी</span>
+                <span class="lang-tag">தமிழ்</span>
+                <span class="lang-tag">中文</span>
+                <span class="lang-tag">العربية</span>
+                <span class="lang-tag">Português</span>
+                <span class="lang-tag">日本語</span>
+            </div>
+        </div>
+        <button class="chatbot-toggle" id="chatbotToggle">
+            <i class="fas fa-comments"></i>
+            <span class="chat-badge" id="chatBadge">1</span>
+        </button>
+        <div class="chatbot-window" id="chatbotWindow">
+            <div class="chatbot-header">
+                <div class="chatbot-title">
+                    <i class="fas fa-robot"></i>
+                    <span data-translate="weatherAssistant">Weather Assistant</span>
+                </div>
+                <div class="chatbot-controls">
+                    <button id="voiceModeBtn" class="btn-icon-small" title="Voice Mode">
+                        <i class="fas fa-volume-high"></i>
+                    </button>
+                    <button id="closeChatbot" class="btn-icon-small">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="chatbot-messages" id="chatMessages">
+                <div class="chat-message bot-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p data-translate="chatWelcome">Hello! I'm your AI Weather Assistant. Ask me anything about the weather - current conditions, forecasts, or advice on what to wear!</p>
+                        <button class="speak-btn" onclick="speakMessage(this)">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="quick-questions">
+                <button class="quick-q" data-question="What's the weather like today?" data-translate="quickQ1">Today's weather?</button>
+                <button class="quick-q" data-question="Will it rain this week?" data-translate="quickQ2">Rain this week?</button>
+                <button class="quick-q" data-question="What should I wear today?" data-translate="quickQ3">What to wear?</button>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatInput" data-translate-placeholder="chatPlaceholder" placeholder="Ask about weather...">
+                <button id="voiceChatBtn" class="btn-icon-small" title="Voice Input">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button id="sendChatBtn" class="btn-icon-small">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Assistant Overlay -->
+    <div class="voice-overlay" id="voiceOverlay">
+        <div class="voice-content">
+            <div class="voice-animation">
+                <div class="voice-circle"></div>
+                <div class="voice-circle"></div>
+                <div class="voice-circle"></div>
+            </div>
+            <p id="voiceStatus" data-translate="listening">Listening...</p>
+            <p id="voiceTranscript" class="voice-transcript"></p>
+            <button id="closeVoice" class="btn-secondary" data-translate="cancel">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="weather-loader">
+                <i class="fas fa-cloud-sun fa-spin"></i>
+            </div>
+            <p data-translate="loading">Loading weather data...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="translations.js"></script>
+    <script src="cities.js"></script>
+    <!-- Leaflet JS for interactive maps -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="weatherMap.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
