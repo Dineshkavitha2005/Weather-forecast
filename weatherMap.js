@@ -14,7 +14,11 @@ const MAP_CONFIG = {
 };
 
 // OpenWeatherMap API Key
-const OWM_API_KEY = '56557251d5db2189c685db5c677e77a9';
+if (typeof CONFIG === 'undefined' || !CONFIG.OPENWEATHER_API_KEY) {
+    console.error('API key not configured. Please copy config.example.js to config.js and add your API key.');
+    throw new Error('API key not configured for weather maps.');
+}
+const OWM_API_KEY = CONFIG.OPENWEATHER_API_KEY;
 
 // Weather Map Layers
 const WEATHER_LAYERS = {

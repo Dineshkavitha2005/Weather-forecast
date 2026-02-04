@@ -1,7 +1,11 @@
 // app.js - Main Application Logic for WeatherWise
 
 // API Configuration
-const API_KEY = '56557251d5db2189c685db5c677e77a9';
+if (typeof CONFIG === 'undefined' || !CONFIG.OPENWEATHER_API_KEY) {
+    alert('⚠️ API key not configured!\n\nPlease follow these steps:\n1. Copy config.example.js to config.js\n2. Add your OpenWeatherMap API key\n3. Refresh the page\n\nSee README.md for detailed instructions.');
+    throw new Error('API key not configured. Please copy config.example.js to config.js and add your API key.');
+}
+const API_KEY = CONFIG.OPENWEATHER_API_KEY;
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 const GEO_URL = 'https://api.openweathermap.org/geo/1.0';
 
