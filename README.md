@@ -42,6 +42,13 @@ npx http-server
 
 4. Access the application at `http://localhost:8000` (or your server's port)
 
+### Demo Video
+
+
+https://github.com/user-attachments/assets/9a06e6c7-b20f-41f6-a3e4-d6375f3cc830
+
+
+
 ## 📁 Project Structure
 
 ```
