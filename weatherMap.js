@@ -1,5 +1,4 @@
 // weatherMap.js - Interactive Weather Map for WeatherWise
-
 // Map Configuration
 const MAP_CONFIG = {
     defaultCenter: [20, 0],
@@ -12,7 +11,6 @@ const MAP_CONFIG = {
         satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
     }
 };
-
 // OpenWeatherMap API Key
 const OWM_API_KEY = (typeof CONFIG !== 'undefined' && typeof CONFIG.OPENWEATHER_API_KEY === 'string')
     ? CONFIG.OPENWEATHER_API_KEY.trim()
@@ -26,6 +24,7 @@ if (!OWM_API_KEY || OWM_API_KEY === 'YOUR_API_KEY_HERE') {
 const WEATHER_LAYERS = {
     temp: {
         name: 'Temperature',
+        translationKey: 'temperature',
         icon: 'fa-temperature-high',
         url: `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
         legend: [
@@ -39,6 +38,7 @@ const WEATHER_LAYERS = {
     },
     precipitation: {
         name: 'Precipitation',
+        translationKey: 'precipitation',
         icon: 'fa-cloud-rain',
         url: `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
         legend: [
@@ -50,6 +50,7 @@ const WEATHER_LAYERS = {
     },
     clouds: {
         name: 'Clouds',
+        translationKey: 'clouds',
         icon: 'fa-cloud',
         url: `https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
         legend: [
@@ -61,6 +62,7 @@ const WEATHER_LAYERS = {
     },
     wind: {
         name: 'Wind Speed',
+        translationKey: 'windSpeed',
         icon: 'fa-wind',
         url: `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
         legend: [
@@ -72,6 +74,7 @@ const WEATHER_LAYERS = {
     },
     pressure: {
         name: 'Pressure',
+        translationKey: 'pressure',
         icon: 'fa-gauge-high',
         url: `https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`,
         legend: [
@@ -81,6 +84,9 @@ const WEATHER_LAYERS = {
         ]
     }
 };
+
+// Current active layer type for tracking
+let currentLayerType = 'temp';
 
 // Map state
 let weatherMap = null;
@@ -149,6 +155,9 @@ function setWeatherLayer(layerType) {
     const layer = WEATHER_LAYERS[layerType];
     if (!layer) return;
     
+    // Track current layer type for translation updates
+    currentLayerType = layerType;
+    
     // Remove current weather layer
     if (currentWeatherLayer) {
         weatherMap.removeLayer(currentWeatherLayer);
@@ -166,16 +175,29 @@ function setWeatherLayer(layerType) {
     });
     
     // Update legend
-    updateLegend(layer);
+    updateLegend(layer, layerType);
+}
+
+// Get translated layer name
+function getLayerName(layer) {
+    if (typeof translations !== 'undefined' && typeof currentLang !== 'undefined') {
+        const t = translations[currentLang];
+        if (t && t[layer.translationKey]) {
+            return t[layer.translationKey];
+        }
+    }
+    return layer.name;
 }
 
 // Update legend
-function updateLegend(layer) {
+function updateLegend(layer, layerType) {
     const legendContainer = document.getElementById('mapLegend');
     if (!legendContainer) return;
     
+    const layerName = getLayerName(layer);
+    
     legendContainer.innerHTML = `
-        <h4><i class="fas ${layer.icon}"></i> ${layer.name}</h4>
+        <h4><i class="fas ${layer.icon}"></i> ${layerName}</h4>
         <div class="legend-items">
             ${layer.legend.map(item => `
                 <div class="legend-item">
@@ -192,15 +214,30 @@ function setupLayerControls() {
     const controlsContainer = document.getElementById('mapLayerControls');
     if (!controlsContainer) return;
     
-    controlsContainer.innerHTML = Object.entries(WEATHER_LAYERS).map(([key, layer]) => `
-        <button class="map-layer-btn ${key === 'temp' ? 'active' : ''}" 
-                data-layer="${key}" 
-                onclick="setWeatherLayer('${key}')"
-                title="${layer.name}">
-            <i class="fas ${layer.icon}"></i>
-            <span>${layer.name}</span>
-        </button>
-    `).join('');
+    controlsContainer.innerHTML = Object.entries(WEATHER_LAYERS).map(([key, layer]) => {
+        const layerName = getLayerName(layer);
+        return `
+            <button class="map-layer-btn ${key === 'temp' ? 'active' : ''}" 
+                    data-layer="${key}"
+                    data-translate-key="${layer.translationKey}"
+                    onclick="setWeatherLayer('${key}')"
+                    title="${layerName}">
+                <i class="fas ${layer.icon}"></i>
+                <span>${layerName}</span>
+            </button>
+        `;
+    }).join('');
+}
+
+// Update map translations when language changes
+function updateMapTranslations() {
+    // Update layer control buttons
+    setupLayerControls();
+    
+    // Update current legend
+    if (currentLayerType && WEATHER_LAYERS[currentLayerType]) {
+        updateLegend(WEATHER_LAYERS[currentLayerType], currentLayerType);
+    }
 }
 
 // Setup map search
