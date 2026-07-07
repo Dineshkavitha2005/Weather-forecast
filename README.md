@@ -67,7 +67,7 @@ python -m http.server 8000
 ### File Structure
 
 ```
-Weather-forecast/
+WeatherWise/
 ├── index.html          # Main HTML file
 ├── app.js             # Main application logic
 ├── weatherMap.js      # Interactive map functionality
