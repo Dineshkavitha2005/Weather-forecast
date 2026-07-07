@@ -1,5 +1,11 @@
 // API Configuration
-const API_KEY = '56557251d5db2189c685db5c677e77a9';
+const API_KEY = (typeof CONFIG !== 'undefined' && typeof CONFIG.OPENWEATHER_API_KEY === 'string')
+    ? CONFIG.OPENWEATHER_API_KEY.trim()
+    : '';
+if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
+    alert('⚠️ API key not configured!\n\nPlease follow these steps:\n1. Copy config.example.js to config.js\n2. Replace YOUR_API_KEY_HERE with your OpenWeatherMap API key\n3. Refresh the page\n\nSee README.md for detailed instructions.');
+    throw new Error('API key not configured. Please copy config.example.js to config.js and add your API key.');
+}
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 const GEO_URL = 'https://api.openweathermap.org/geo/1.0';
 
