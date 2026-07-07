@@ -60,8 +60,9 @@ python -m http.server 8000
 ### API Key Security
 
 - ✅ **Never commit `config.js`** - This file contains your API key and is git-ignored
-- ✅ **Use environment variables** - For production deployments, consider using environment variables
 - ✅ **Rotate keys regularly** - Periodically regenerate your API key on OpenWeatherMap
+- ✅ **If a key was ever committed, rotate it immediately** - Removing it from the working tree does not remove it from Git history
+- ✅ **Use environment variables** - For production deployments, consider using environment variables
 - ✅ **Set up usage limits** - Configure API rate limits on your OpenWeatherMap account
 
 ### File Structure
