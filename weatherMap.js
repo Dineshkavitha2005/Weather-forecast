@@ -14,11 +14,13 @@ const MAP_CONFIG = {
 };
 
 // OpenWeatherMap API Key
-if (typeof CONFIG === 'undefined' || !CONFIG.OPENWEATHER_API_KEY) {
+const OWM_API_KEY = (typeof CONFIG !== 'undefined' && typeof CONFIG.OPENWEATHER_API_KEY === 'string')
+    ? CONFIG.OPENWEATHER_API_KEY.trim()
+    : '';
+if (!OWM_API_KEY || OWM_API_KEY === 'YOUR_API_KEY_HERE') {
     console.error('API key not configured. Please copy config.example.js to config.js and add your API key.');
     throw new Error('API key not configured for weather maps.');
 }
-const OWM_API_KEY = CONFIG.OPENWEATHER_API_KEY;
 
 // Weather Map Layers
 const WEATHER_LAYERS = {
