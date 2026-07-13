@@ -1,5 +1,3 @@
-// auth.js - Authentication Logic for WeatherWise
-// DOM Elements
 const loginForm = document.getElementById('loginForm');
 const signupForm = document.getElementById('signupForm');
 const forgotForm = document.getElementById('forgotForm');
@@ -7,59 +5,47 @@ const authSuccess = document.getElementById('authSuccess');
 const authTabs = document.querySelectorAll('.auth-tab');
 const strengthBar = document.getElementById('strengthBar');
 const toastContainer = document.getElementById('toastContainer');
-// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     checkExistingSession();
 });
-// Setup Event Listeners
 function setupEventListeners() {
-    // Tab switching
     authTabs.forEach(tab => {
         tab.addEventListener('click', () => switchTab(tab.dataset.tab));
     });
     
-    // Form submissions
     loginForm.addEventListener('submit', handleLogin);
     signupForm.addEventListener('submit', handleSignup);
     forgotForm.addEventListener('submit', handleForgotPassword);
     
-    // Password strength checker
     const signupPassword = document.getElementById('signupPassword');
     if (signupPassword) {
         signupPassword.addEventListener('input', checkPasswordStrength);
     }
     
-    // Confirm password validation
     const confirmPassword = document.getElementById('confirmPassword');
     if (confirmPassword) {
         confirmPassword.addEventListener('input', validateConfirmPassword);
     }
 }
 
-// Check for existing session
 function checkExistingSession() {
     const user = JSON.parse(localStorage.getItem('weatherwise_user'));
     if (user && user.isLoggedIn) {
-        // Redirect to main app if already logged in
         window.location.href = 'index.html';
     }
 }
 
-// Switch between login and signup tabs
 function switchTab(tab) {
-    // Update tabs
     authTabs.forEach(t => {
         t.classList.toggle('active', t.dataset.tab === tab);
     });
     
-    // Hide all forms
     loginForm.classList.remove('active');
     signupForm.classList.remove('active');
     forgotForm.classList.remove('active');
     authSuccess.classList.remove('active');
     
-    // Show selected form
     if (tab === 'login') {
         loginForm.classList.add('active');
     } else if (tab === 'signup') {
@@ -67,7 +53,6 @@ function switchTab(tab) {
     }
 }
 
-// Show forgot password form
 function showForgotPassword() {
     loginForm.classList.remove('active');
     signupForm.classList.remove('active');
@@ -75,13 +60,11 @@ function showForgotPassword() {
     authSuccess.classList.remove('active');
 }
 
-// Show login form (back from forgot password)
 function showLoginForm() {
     forgotForm.classList.remove('active');
     loginForm.classList.add('active');
 }
 
-// Toggle password visibility
 function togglePassword(inputId) {
     const input = document.getElementById(inputId);
     const button = input.parentElement.querySelector('.toggle-password i');
@@ -97,36 +80,28 @@ function togglePassword(inputId) {
     }
 }
 
-// Check password strength
 function checkPasswordStrength(e) {
     const password = e.target.value;
     const strengthContainer = document.querySelector('.password-strength');
     let strength = 0;
     
-    // Show/hide strength bar container
     if (password.length > 0) {
         strengthContainer.classList.add('active');
     } else {
         strengthContainer.classList.remove('active');
     }
     
-    // Length check
     if (password.length >= 8) strength++;
     if (password.length >= 12) strength++;
     
-    // Contains lowercase
     if (/[a-z]/.test(password)) strength++;
     
-    // Contains uppercase
     if (/[A-Z]/.test(password)) strength++;
     
-    // Contains numbers
     if (/[0-9]/.test(password)) strength++;
     
-    // Contains special characters
     if (/[^a-zA-Z0-9]/.test(password)) strength++;
     
-    // Update strength bar
     strengthBar.className = 'strength-bar';
     if (password.length === 0) {
         strengthBar.style.width = '0';
@@ -139,7 +114,6 @@ function checkPasswordStrength(e) {
     }
 }
 
-// Validate confirm password
 function validateConfirmPassword(e) {
     const password = document.getElementById('signupPassword').value;
     const confirmPassword = e.target.value;
@@ -151,7 +125,6 @@ function validateConfirmPassword(e) {
     }
 }
 
-// Handle Login
 async function handleLogin(e) {
     e.preventDefault();
     
@@ -159,23 +132,19 @@ async function handleLogin(e) {
     const password = document.getElementById('loginPassword').value;
     const rememberMe = document.getElementById('rememberMe').checked;
     
-    // Validate
     if (!email || !password) {
         showToast('Please fill in all fields', 'error');
         return;
     }
     
-    // Show loading
     const submitBtn = loginForm.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
     submitBtn.disabled = true;
     
     try {
-        // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Check stored users
         const users = JSON.parse(localStorage.getItem('weatherwise_users')) || [];
         const user = users.find(u => u.email === email);
         
@@ -187,7 +156,6 @@ async function handleLogin(e) {
             throw new Error('Invalid password. Please try again.');
         }
         
-        // Save session
         const sessionUser = {
             id: user.id,
             firstName: user.firstName,
@@ -204,10 +172,8 @@ async function handleLogin(e) {
             sessionStorage.setItem('weatherwise_user', JSON.stringify(sessionUser));
         }
         
-        // Show success
         showSuccess('Welcome Back!', `Hello ${user.firstName}! Redirecting to your dashboard...`);
         
-        // Redirect after delay
         setTimeout(() => {
             window.location.href = 'index.html';
         }, 2000);
@@ -219,7 +185,6 @@ async function handleLogin(e) {
     }
 }
 
-// Handle Sign Up
 async function handleSignup(e) {
     e.preventDefault();
     
@@ -232,7 +197,6 @@ async function handleSignup(e) {
     const agreeTerms = document.getElementById('agreeTerms').checked;
     const newsletter = document.getElementById('newsletter').checked;
     
-    // Validate
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
         showToast('Please fill in all required fields', 'error');
         return;
@@ -253,23 +217,19 @@ async function handleSignup(e) {
         return;
     }
     
-    // Show loading
     const submitBtn = signupForm.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
     submitBtn.disabled = true;
     
     try {
-        // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Check if user exists
         const users = JSON.parse(localStorage.getItem('weatherwise_users')) || [];
         if (users.find(u => u.email === email)) {
             throw new Error('An account with this email already exists.');
         }
         
-        // Create new user
         const newUser = {
             id: Date.now().toString(),
             firstName,
@@ -284,7 +244,6 @@ async function handleSignup(e) {
         users.push(newUser);
         localStorage.setItem('weatherwise_users', JSON.stringify(users));
         
-        // Auto login
         const sessionUser = {
             id: newUser.id,
             firstName: newUser.firstName,
@@ -296,10 +255,8 @@ async function handleSignup(e) {
         };
         localStorage.setItem('weatherwise_user', JSON.stringify(sessionUser));
         
-        // Show success
         showSuccess('Account Created!', `Welcome ${firstName}! Your account has been created successfully.`);
         
-        // Redirect after delay
         setTimeout(() => {
             window.location.href = 'index.html';
         }, 2500);
@@ -311,7 +268,6 @@ async function handleSignup(e) {
     }
 }
 
-// Handle Forgot Password
 async function handleForgotPassword(e) {
     e.preventDefault();
     
@@ -322,21 +278,17 @@ async function handleForgotPassword(e) {
         return;
     }
     
-    // Show loading
     const submitBtn = forgotForm.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
     submitBtn.disabled = true;
     
     try {
-        // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Check if user exists
         const users = JSON.parse(localStorage.getItem('weatherwise_users')) || [];
         const user = users.find(u => u.email === email);
         
-        // Always show success (for security, don't reveal if email exists)
         showSuccess('Check Your Email', 'If an account exists with this email, you will receive a password reset link shortly.');
         
     } catch (error) {
@@ -346,12 +298,10 @@ async function handleForgotPassword(e) {
     }
 }
 
-// Social Login
 function socialLogin(provider) {
     showToast(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login coming soon!`, 'info');
 }
 
-// Show Success
 function showSuccess(title, message) {
     document.getElementById('successTitle').textContent = title;
     document.getElementById('successMessage').textContent = message;
@@ -361,16 +311,13 @@ function showSuccess(title, message) {
     forgotForm.classList.remove('active');
     authSuccess.classList.add('active');
     
-    // Hide tabs
     document.querySelector('.auth-tabs').style.display = 'none';
 }
 
-// Go to App
 function goToApp() {
     window.location.href = 'index.html';
 }
 
-// Show Toast
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -396,7 +343,6 @@ function showToast(message, type = 'info') {
     }, 4000);
 }
 
-// Export functions for global access
 window.togglePassword = togglePassword;
 window.showForgotPassword = showForgotPassword;
 window.showLoginForm = showLoginForm;

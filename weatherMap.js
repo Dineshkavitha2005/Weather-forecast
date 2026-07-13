@@ -1,5 +1,3 @@
-// weatherMap.js - Interactive Weather Map for WeatherWise
-// Map Configuration
 const MAP_CONFIG = {
     defaultCenter: [20, 0],
     defaultZoom: 2,
@@ -11,7 +9,6 @@ const MAP_CONFIG = {
         satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
     }
 };
-// OpenWeatherMap API Key
 const OWM_API_KEY = (typeof CONFIG !== 'undefined' && typeof CONFIG.OPENWEATHER_API_KEY === 'string')
     ? CONFIG.OPENWEATHER_API_KEY.trim()
     : '';
@@ -20,7 +17,6 @@ if (!OWM_API_KEY || OWM_API_KEY === 'YOUR_API_KEY_HERE') {
     throw new Error('API key not configured for weather maps.');
 }
 
-// Weather Map Layers
 const WEATHER_LAYERS = {
     temp: {
         name: 'Temperature',
@@ -85,24 +81,20 @@ const WEATHER_LAYERS = {
     }
 };
 
-// Current active layer type for tracking
 let currentLayerType = 'temp';
 
-// Map state
 let weatherMap = null;
 let currentLayer = null;
 let currentWeatherLayer = null;
 let markers = [];
 let isMapInitialized = false;
 
-// Initialize Weather Map
 function initWeatherMap() {
     if (isMapInitialized) return;
     
     const mapContainer = document.getElementById('weatherMapContainer');
     if (!mapContainer) return;
     
-    // Create map
     weatherMap = L.map('weatherMapContainer', {
         center: MAP_CONFIG.defaultCenter,
         zoom: MAP_CONFIG.defaultZoom,
@@ -111,28 +103,21 @@ function initWeatherMap() {
         zoomControl: false
     });
     
-    // Add zoom control to top-right
     L.control.zoom({ position: 'topright' }).addTo(weatherMap);
     
-    // Add base tile layer
     updateBaseLayer();
     
-    // Add default weather layer (temperature)
     setWeatherLayer('temp');
     
-    // Setup layer controls
     setupLayerControls();
     
-    // Setup map search
     setupMapSearch();
     
-    // Get user's location
     getUserLocation();
     
     isMapInitialized = true;
 }
 
-// Update base layer based on theme
 function updateBaseLayer() {
     if (!weatherMap) return;
     
@@ -148,37 +133,30 @@ function updateBaseLayer() {
     }).addTo(weatherMap);
 }
 
-// Set weather layer
 function setWeatherLayer(layerType) {
     if (!weatherMap) return;
     
     const layer = WEATHER_LAYERS[layerType];
     if (!layer) return;
     
-    // Track current layer type for translation updates
     currentLayerType = layerType;
     
-    // Remove current weather layer
     if (currentWeatherLayer) {
         weatherMap.removeLayer(currentWeatherLayer);
     }
     
-    // Add new weather layer
     currentWeatherLayer = L.tileLayer(layer.url, {
         opacity: 0.7,
         maxZoom: 18
     }).addTo(weatherMap);
     
-    // Update active button
     document.querySelectorAll('.map-layer-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.layer === layerType);
     });
     
-    // Update legend
     updateLegend(layer, layerType);
 }
 
-// Get translated layer name
 function getLayerName(layer) {
     if (typeof translations !== 'undefined' && typeof currentLang !== 'undefined') {
         const t = translations[currentLang];
@@ -189,7 +167,6 @@ function getLayerName(layer) {
     return layer.name;
 }
 
-// Update legend
 function updateLegend(layer, layerType) {
     const legendContainer = document.getElementById('mapLegend');
     if (!legendContainer) return;
@@ -209,7 +186,6 @@ function updateLegend(layer, layerType) {
     `;
 }
 
-// Setup layer controls
 function setupLayerControls() {
     const controlsContainer = document.getElementById('mapLayerControls');
     if (!controlsContainer) return;
@@ -229,25 +205,20 @@ function setupLayerControls() {
     }).join('');
 }
 
-// Update map translations when language changes
 function updateMapTranslations() {
-    // Update layer control buttons
     setupLayerControls();
     
-    // Update current legend
     if (currentLayerType && WEATHER_LAYERS[currentLayerType]) {
         updateLegend(WEATHER_LAYERS[currentLayerType], currentLayerType);
     }
 }
 
-// Setup map search
 function setupMapSearch() {
     const searchInput = document.getElementById('mapSearchInput');
     if (!searchInput) return;
     
     let highlightedIndex = -1;
     
-    // Input event for autocomplete
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.trim();
         highlightedIndex = -1;
@@ -258,7 +229,6 @@ function setupMapSearch() {
         }
     });
     
-    // Keyboard navigation
     searchInput.addEventListener('keydown', (e) => {
         const suggestionsList = document.getElementById('mapSuggestionsList');
         const items = suggestionsList?.querySelectorAll('.suggestion-item') || [];
@@ -287,7 +257,6 @@ function setupMapSearch() {
         }
     });
     
-    // Hide suggestions on click outside
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.map-search')) {
             hideMapSuggestions();
@@ -295,7 +264,6 @@ function setupMapSearch() {
     });
 }
 
-// Show map suggestions
 function showMapSuggestions(query) {
     const container = document.getElementById('mapSuggestionsContainer');
     const list = document.getElementById('mapSuggestionsList');
@@ -303,7 +271,6 @@ function showMapSuggestions(query) {
     
     const queryLower = query.toLowerCase();
     
-    // Filter cities from database
     const matchingCities = citiesDatabase.filter(city => {
         const cityName = city.name.toLowerCase();
         const stateName = city.state ? city.state.toLowerCase() : '';
@@ -336,7 +303,6 @@ function showMapSuggestions(query) {
     container.classList.add('active');
 }
 
-// Hide map suggestions
 function hideMapSuggestions() {
     const container = document.getElementById('mapSuggestionsContainer');
     if (container) {
@@ -344,14 +310,12 @@ function hideMapSuggestions() {
     }
 }
 
-// Update highlight for keyboard navigation
 function updateMapHighlight(items, index) {
     items.forEach((item, i) => {
         item.classList.toggle('highlighted', i === index);
     });
 }
 
-// Select map suggestion
 function selectMapSuggestion(cityName, state, country) {
     const searchInput = document.getElementById('mapSearchInput');
     const searchTerm = state ? `${cityName}, ${state}, ${country}` : `${cityName}, ${country}`;
@@ -364,7 +328,6 @@ function selectMapSuggestion(cityName, state, country) {
     searchLocation(searchTerm);
 }
 
-// Search location on map
 async function searchLocation(query) {
     try {
         const response = await fetch(
@@ -375,10 +338,8 @@ async function searchLocation(query) {
         if (data && data.length > 0) {
             const { lat, lon, name, country } = data[0];
             
-            // Pan to location
             weatherMap.setView([lat, lon], 10);
             
-            // Add marker with weather info
             await addWeatherMarker(lat, lon, name, country);
         } else {
             showMapToast('Location not found', 'error');
@@ -389,16 +350,13 @@ async function searchLocation(query) {
     }
 }
 
-// Add weather marker
 async function addWeatherMarker(lat, lon, name, country) {
     try {
-        // Get weather data
         const response = await fetch(
             `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OWM_API_KEY}`
         );
         const weather = await response.json();
         
-        // Create custom icon
         const iconHtml = `
             <div class="weather-marker">
                 <img src="https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png" alt="weather">
@@ -413,11 +371,9 @@ async function addWeatherMarker(lat, lon, name, country) {
             iconAnchor: [30, 30]
         });
         
-        // Remove existing markers
         markers.forEach(m => weatherMap.removeLayer(m));
         markers = [];
         
-        // Add new marker
         const marker = L.marker([lat, lon], { icon: customIcon })
             .addTo(weatherMap)
             .bindPopup(`
@@ -446,14 +402,12 @@ async function addWeatherMarker(lat, lon, name, country) {
     }
 }
 
-// Get user's location
 function getUserLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             async (position) => {
                 const { latitude, longitude } = position.coords;
                 
-                // Get location name
                 try {
                     const response = await fetch(
                         `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${OWM_API_KEY}`
@@ -476,7 +430,6 @@ function getUserLocation() {
     }
 }
 
-// Show map toast
 function showMapToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `map-toast ${type}`;
@@ -489,7 +442,6 @@ function showMapToast(message, type = 'info') {
     }
 }
 
-// Toggle fullscreen
 function toggleMapFullscreen() {
     const mapWrapper = document.querySelector('.weather-map-wrapper');
     if (!mapWrapper) return;
@@ -505,14 +457,12 @@ function toggleMapFullscreen() {
     }
 }
 
-// Recenter map
 function recenterMap() {
     if (weatherMap) {
         getUserLocation();
     }
 }
 
-// Change map style
 function changeMapStyle(style) {
     if (!weatherMap) return;
     
@@ -526,13 +476,11 @@ function changeMapStyle(style) {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(weatherMap);
     
-    // Update style buttons
     document.querySelectorAll('.map-style-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.style === style);
     });
 }
 
-// Listen for theme changes
 const themeObserver = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
         if (mutation.attributeName === 'class') {
@@ -541,12 +489,10 @@ const themeObserver = new MutationObserver((mutations) => {
     });
 });
 
-// Start observing body for theme changes
 document.addEventListener('DOMContentLoaded', () => {
     themeObserver.observe(document.body, { attributes: true });
 });
 
-// Export functions
 window.initWeatherMap = initWeatherMap;
 window.setWeatherLayer = setWeatherLayer;
 window.toggleMapFullscreen = toggleMapFullscreen;
