@@ -1,4 +1,3 @@
-// API Configuration
 const API_KEY = (typeof CONFIG !== 'undefined' && typeof CONFIG.OPENWEATHER_API_KEY === 'string')
     ? CONFIG.OPENWEATHER_API_KEY.trim()
     : '';
@@ -9,7 +8,6 @@ if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 const GEO_URL = 'https://api.openweathermap.org/geo/1.0';
 
-// Global State
 let currentCity = 'London';
 let currentLat = 51.5074;
 let currentLon = -0.1278;
@@ -25,7 +23,6 @@ let currentSuggestions = [];
 let recentSearches = [];
 const MAX_RECENT_SEARCHES = 5;
 
-// DOM Elements
 const elements = {
     citySearch: document.getElementById('citySearch'),
     searchBtn: document.getElementById('searchBtn'),
@@ -38,7 +35,6 @@ const elements = {
     suggestionsContainer: document.getElementById('suggestionsContainer'),
     suggestionsList: document.getElementById('suggestionsList'),
     
-    // Current Weather
     cityName: document.getElementById('cityName'),
     currentDate: document.getElementById('currentDate'),
     weatherIcon: document.getElementById('weatherIcon'),
@@ -53,7 +49,6 @@ const elements = {
     sunrise: document.getElementById('sunrise'),
     sunset: document.getElementById('sunset'),
     
-    // Forecasts
     weeklyForecast: document.getElementById('weeklyForecast'),
     hourlyForecast: document.getElementById('hourlyForecast'),
     monthlyCalendar: document.getElementById('monthlyCalendar'),
@@ -61,22 +56,18 @@ const elements = {
     prevMonth: document.getElementById('prevMonth'),
     nextMonth: document.getElementById('nextMonth'),
     
-    // Monthly Stats
     avgHighTemp: document.getElementById('avgHighTemp'),
     avgLowTemp: document.getElementById('avgLowTemp'),
     rainyDays: document.getElementById('rainyDays'),
     sunnyDays: document.getElementById('sunnyDays'),
     
-    // AI Prediction
     extendedForecast: document.getElementById('extendedForecast'),
     weatherTrends: document.getElementById('weatherTrends'),
     weatherAlerts: document.getElementById('weatherAlerts'),
     aiRecommendations: document.getElementById('aiRecommendations'),
     
-    // Weather Map
     weatherMap: document.getElementById('weatherMap'),
     
-    // Chatbot
     chatbotToggle: document.getElementById('chatbotToggle'),
     chatbotWindow: document.getElementById('chatbotWindow'),
     closeChatbot: document.getElementById('closeChatbot'),
@@ -87,51 +78,38 @@ const elements = {
     voiceModeBtn: document.getElementById('voiceModeBtn'),
     chatBadge: document.getElementById('chatBadge'),
     
-    // Voice
     voiceOverlay: document.getElementById('voiceOverlay'),
     voiceStatus: document.getElementById('voiceStatus'),
     voiceTranscript: document.getElementById('voiceTranscript'),
     closeVoice: document.getElementById('closeVoice')
 };
 
-// Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
 });
 
 function initializeApp() {
-    // Load saved preferences
     loadPreferences();
     
-    // Load recent searches
     loadRecentSearches();
     
-    // Apply theme
     applyTheme();
     
-    // Apply language
     applyLanguage();
     
-    // Set up event listeners
     setupEventListeners();
     
-    // Check user authentication state
     checkUserAuth();
     
-    // Initialize weather map
     setTimeout(() => {
         if (typeof initWeatherMap === 'function') {
             initWeatherMap();
         }
     }, 500);
     
-    // Load default city weather immediately (no loading screen)
     fetchWeatherData(currentLat, currentLon);
 }
 
-// ==========================================
-// Preferences Management
-// ==========================================
 
 function loadPreferences() {
     const savedLang = localStorage.getItem('weatherwise_lang');
@@ -158,12 +136,8 @@ function savePreferences() {
     localStorage.setItem('weatherwise_city', currentCity);
 }
 
-// ==========================================
-// User Authentication Management
-// ==========================================
 
 function checkUserAuth() {
-    // Check localStorage and sessionStorage for logged in user
     let user = JSON.parse(localStorage.getItem('weatherwise_user'));
     if (!user) {
         user = JSON.parse(sessionStorage.getItem('weatherwise_user'));
@@ -176,7 +150,6 @@ function checkUserAuth() {
     const userAvatarBtn = document.getElementById('userAvatarBtn');
     
     if (user && user.isLoggedIn) {
-        // User is logged in
         if (userDisplayName) {
             userDisplayName.textContent = `${user.firstName} ${user.lastName}`;
         }
@@ -184,7 +157,6 @@ function checkUserAuth() {
         if (signupBtn) signupBtn.style.display = 'none';
         if (logoutBtn) logoutBtn.style.display = 'flex';
         
-        // Update avatar icon
         if (userAvatarBtn) {
             userAvatarBtn.innerHTML = `<span class="user-initial">${user.firstName.charAt(0)}</span>`;
             userAvatarBtn.style.background = 'var(--accent-gradient)';
@@ -192,13 +164,11 @@ function checkUserAuth() {
             userAvatarBtn.style.fontWeight = '600';
         }
         
-        // If user has default city, use it
         if (user.defaultCity && user.defaultCity.trim()) {
             currentCity = user.defaultCity;
             searchCity(user.defaultCity);
         }
     } else {
-        // User is not logged in
         if (userDisplayName) {
             userDisplayName.textContent = 'Guest';
         }
@@ -207,29 +177,22 @@ function checkUserAuth() {
         if (logoutBtn) logoutBtn.style.display = 'none';
     }
     
-    // Add logout handler
     if (logoutBtn) {
         logoutBtn.addEventListener('click', handleLogout);
     }
 }
 
 function handleLogout() {
-    // Clear user data
     localStorage.removeItem('weatherwise_user');
     sessionStorage.removeItem('weatherwise_user');
     
-    // Show toast
     showToast(translations[currentLang].logoutSuccess || 'Logged out successfully!', 'success');
     
-    // Refresh auth state
     setTimeout(() => {
         window.location.reload();
     }, 1000);
 }
 
-// ==========================================
-// Theme Management
-// ==========================================
 
 function applyTheme() {
     document.documentElement.setAttribute('data-theme', currentTheme);
@@ -243,14 +206,10 @@ function toggleTheme() {
     savePreferences();
 }
 
-// ==========================================
-// Language Management
-// ==========================================
 
 function applyLanguage() {
     const t = translations[currentLang];
     
-    // Update all translatable elements
     document.querySelectorAll('[data-translate]').forEach(el => {
         const key = el.getAttribute('data-translate');
         if (t[key]) {
@@ -258,7 +217,6 @@ function applyLanguage() {
         }
     });
     
-    // Update placeholders
     document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
         const key = el.getAttribute('data-translate-placeholder');
         if (t[key]) {
@@ -266,17 +224,14 @@ function applyLanguage() {
         }
     });
     
-    // Update HTML lang attribute
     document.documentElement.lang = currentLang;
     
-    // Handle RTL languages
     if (currentLang === 'ar') {
         document.documentElement.dir = 'rtl';
     } else {
         document.documentElement.dir = 'ltr';
     }
     
-    // Update weather map translations (layer buttons and legend)
     if (typeof updateMapTranslations === 'function') {
         updateMapTranslations();
     }
@@ -287,18 +242,13 @@ function changeLanguage(lang) {
     applyLanguage();
     savePreferences();
     
-    // Refresh weather data with new language
     if (currentLat && currentLon) {
         fetchWeatherData(currentLat, currentLon);
     }
 }
 
-// ==========================================
-// Event Listeners
-// ==========================================
 
 function setupEventListeners() {
-    // Search
     elements.searchBtn.addEventListener('click', handleSearch);
     elements.citySearch.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
@@ -307,7 +257,6 @@ function setupEventListeners() {
         }
     });
     
-    // Autocomplete suggestions
     elements.citySearch.addEventListener('input', handleSearchInput);
     elements.citySearch.addEventListener('keydown', handleSearchKeydown);
     elements.citySearch.addEventListener('focus', () => {
@@ -319,37 +268,29 @@ function setupEventListeners() {
         }
     });
     
-    // Close suggestions when clicking outside
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.search-input-wrapper')) {
             hideSuggestions();
         }
     });
     
-    // Location
     elements.locationBtn.addEventListener('click', getUserLocation);
     
-    // Voice Search
     elements.voiceSearchBtn.addEventListener('click', startVoiceSearch);
     
-    // Theme Toggle
     elements.themeToggle.addEventListener('click', toggleTheme);
     
-    // Language Select
     elements.languageSelect.addEventListener('change', (e) => {
         changeLanguage(e.target.value);
     });
     
-    // Monthly Navigation
     elements.prevMonth.addEventListener('click', () => navigateMonth(-1));
     elements.nextMonth.addEventListener('click', () => navigateMonth(1));
     
-    // Map Tabs
     document.querySelectorAll('.map-tab').forEach(tab => {
         tab.addEventListener('click', () => handleMapTabClick(tab));
     });
     
-    // Chatbot
     elements.chatbotToggle.addEventListener('click', toggleChatbot);
     elements.closeChatbot.addEventListener('click', closeChatbot);
     elements.sendChatBtn.addEventListener('click', sendChatMessage);
@@ -359,7 +300,6 @@ function setupEventListeners() {
     elements.voiceChatBtn.addEventListener('click', startVoiceChat);
     elements.voiceModeBtn.addEventListener('click', toggleVoiceMode);
     
-    // Quick Questions
     document.querySelectorAll('.quick-q').forEach(btn => {
         btn.addEventListener('click', () => {
             const question = btn.getAttribute('data-question');
@@ -368,15 +308,10 @@ function setupEventListeners() {
         });
     });
     
-    // Voice Overlay
     elements.closeVoice.addEventListener('click', closeVoiceOverlay);
 }
 
-// ==========================================
-// API Functions
-// ==========================================
 
-// Country name to code mapping
 const countryNameToCode = {
     'india': 'IN', 'usa': 'US', 'united states': 'US', 'america': 'US',
     'uk': 'GB', 'united kingdom': 'GB', 'england': 'GB', 'britain': 'GB',
@@ -396,13 +331,11 @@ const countryNameToCode = {
 };
 
 function normalizeSearchQuery(query) {
-    // Check if query contains a comma (city, country format)
     if (query.includes(',')) {
         const parts = query.split(',').map(p => p.trim());
         const city = parts[0];
         const countryPart = parts[parts.length - 1].toLowerCase();
         
-        // Convert country name to code if needed
         const countryCode = countryNameToCode[countryPart] || countryPart.toUpperCase();
         
         return `${city},${countryCode}`;
@@ -412,7 +345,6 @@ function normalizeSearchQuery(query) {
 
 async function searchCity(cityName) {
     try {
-        // Normalize the search query
         const normalizedQuery = normalizeSearchQuery(cityName);
         
         const response = await fetch(
@@ -421,7 +353,6 @@ async function searchCity(cityName) {
         const data = await response.json();
         
         if (data.length === 0) {
-            // Try searching with just the city name if the full query failed
             const cityOnly = cityName.split(',')[0].trim();
             const retryResponse = await fetch(
                 `${GEO_URL}/direct?q=${encodeURIComponent(cityOnly)}&limit=5&appid=${API_KEY}`
@@ -455,22 +386,18 @@ async function fetchWeatherData(lat, lon) {
     showLoading();
     
     try {
-        // Get OWM API language code (some languages like Tamil are not supported)
         const apiLang = typeof getOwmLangCode === 'function' ? getOwmLangCode(currentLang) : currentLang;
         
-        // Fetch current weather
         const currentResponse = await fetch(
             `${BASE_URL}/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=${apiLang}`
         );
         weatherData = await currentResponse.json();
         
-        // Fetch 5-day forecast (3-hour intervals)
         const forecastResponse = await fetch(
             `${BASE_URL}/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=${apiLang}`
         );
         forecastData = await forecastResponse.json();
         
-        // Update UI
         updateCurrentWeather();
         updateHourlyForecast();
         updateWeeklyForecast();
@@ -486,22 +413,17 @@ async function fetchWeatherData(lat, lon) {
     }
 }
 
-// ==========================================
-// UI Update Functions
-// ==========================================
 
 function updateCurrentWeather() {
     if (!weatherData) return;
     
     const t = translations[currentLang];
     
-    // City name and date - Use the searched city name if available, otherwise use API response
     const displayCity = currentCity || weatherData.name;
     const translatedCity = getCityName(displayCity, currentLang);
     elements.cityName.textContent = `${translatedCity}, ${weatherData.sys.country}`;
     savePreferences();
     
-    // Format date
     const now = new Date();
     const options = { 
         weekday: 'long', 
@@ -513,33 +435,27 @@ function updateCurrentWeather() {
     };
     elements.currentDate.textContent = now.toLocaleDateString(getLangCode(), options);
     
-    // Weather icon
     const iconCode = weatherData.weather[0].icon;
     elements.weatherIcon.src = `https://openweathermap.org/img/wn/${iconCode}@4x.png`;
     elements.weatherIcon.alt = weatherData.weather[0].description;
     
-    // Temperature
     elements.currentTemp.textContent = `${Math.round(weatherData.main.temp)}°C`;
     
-    // Translate weather description for unsupported languages
     let weatherDesc = weatherData.weather[0].description;
     if (typeof getWeatherDescription === 'function') {
         weatherDesc = getWeatherDescription(weatherDesc, currentLang);
     }
     elements.weatherDescription.textContent = weatherDesc;
     
-    // Details
     elements.feelsLike.textContent = `${Math.round(weatherData.main.feels_like)}°C`;
     elements.humidity.textContent = `${weatherData.main.humidity}%`;
     elements.windSpeed.textContent = `${Math.round(weatherData.wind.speed * 3.6)} km/h`;
     elements.visibility.textContent = `${(weatherData.visibility / 1000).toFixed(1)} km`;
     elements.pressure.textContent = `${weatherData.main.pressure} hPa`;
     
-    // UV Index (estimated based on conditions)
     const uvEstimate = estimateUVIndex(weatherData);
     elements.uvIndex.textContent = uvEstimate;
     
-    // Sunrise/Sunset
     const sunriseTime = new Date(weatherData.sys.sunrise * 1000);
     const sunsetTime = new Date(weatherData.sys.sunset * 1000);
     elements.sunrise.textContent = sunriseTime.toLocaleTimeString(getLangCode(), { hour: '2-digit', minute: '2-digit' });
@@ -552,14 +468,12 @@ function updateHourlyForecast() {
     const t = translations[currentLang];
     elements.hourlyForecast.innerHTML = '';
     
-    // Get next 24 hours (8 * 3-hour intervals)
     const hourlyItems = forecastData.list.slice(0, 8);
     
     hourlyItems.forEach((item, index) => {
         const time = new Date(item.dt * 1000);
         const isNow = index === 0;
         
-        // Translate weather description for unsupported languages
         let hourlyDesc = item.weather[0].description;
         if (typeof getWeatherDescription === 'function') {
             hourlyDesc = getWeatherDescription(hourlyDesc, currentLang);
@@ -582,7 +496,6 @@ function updateWeeklyForecast() {
     const t = translations[currentLang];
     elements.weeklyForecast.innerHTML = '';
     
-    // Group forecast by day
     const dailyData = {};
     forecastData.list.forEach(item => {
         const date = new Date(item.dt * 1000).toDateString();
@@ -599,7 +512,6 @@ function updateWeeklyForecast() {
         dailyData[date].descriptions.push(item.weather[0].description);
     });
     
-    // Get unique days
     const days = Object.values(dailyData).slice(0, 7);
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const shortDayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -608,7 +520,6 @@ function updateWeeklyForecast() {
         const maxTemp = Math.round(Math.max(...day.temps));
         const minTemp = Math.round(Math.min(...day.temps));
         
-        // Get most common icon
         const iconCounts = {};
         day.icons.forEach(icon => {
             iconCounts[icon] = (iconCounts[icon] || 0) + 1;
@@ -618,7 +529,6 @@ function updateWeeklyForecast() {
         const dayName = index === 0 ? t.today : t[dayNames[day.date.getDay()]];
         const shortDay = t[shortDayNames[day.date.getDay()]];
         
-        // Translate weather description for unsupported languages
         let forecastDesc = day.descriptions[0];
         if (typeof getWeatherDescription === 'function') {
             forecastDesc = getWeatherDescription(forecastDesc, currentLang);
@@ -646,13 +556,10 @@ function updateMonthlyCalendar() {
                         'july', 'august', 'september', 'october', 'november', 'december'];
     const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
     
-    // Update month display
     elements.currentMonth.textContent = `${t[monthNames[currentMonth]]} ${currentYear}`;
     
-    // Clear calendar
     elements.monthlyCalendar.innerHTML = '';
     
-    // Add day headers
     dayNames.forEach(day => {
         const header = document.createElement('div');
         header.className = 'calendar-header';
@@ -660,24 +567,20 @@ function updateMonthlyCalendar() {
         elements.monthlyCalendar.appendChild(header);
     });
     
-    // Get first day of month and number of days
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const today = new Date();
     
-    // Add empty cells for days before first of month
     for (let i = 0; i < firstDay; i++) {
         const emptyDay = document.createElement('div');
         emptyDay.className = 'calendar-day empty';
         elements.monthlyCalendar.appendChild(emptyDay);
     }
     
-    // Generate weather data for the month (simulated for past/future dates)
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(currentYear, currentMonth, day);
         const isToday = date.toDateString() === today.toDateString();
         
-        // Generate simulated weather for the month
         const simulatedWeather = generateSimulatedWeather(date);
         
         const dayCell = document.createElement('div');
@@ -690,12 +593,10 @@ function updateMonthlyCalendar() {
         elements.monthlyCalendar.appendChild(dayCell);
     }
     
-    // Update monthly summary
     updateMonthlySummary();
 }
 
 function updateMonthlySummary() {
-    // Generate simulated monthly stats
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     let totalHigh = 0, totalLow = 0, rainy = 0, sunny = 0;
     
@@ -715,22 +616,17 @@ function updateMonthlySummary() {
 }
 
 function generateSimulatedWeather(date) {
-    // Generate weather based on month and location
     const month = date.getMonth();
     const baseTemp = weatherData ? weatherData.main.temp : 20;
     
-    // Seasonal adjustment
     const seasonalOffset = Math.sin((month - 6) * Math.PI / 6) * 10;
     
-    // Random variation
     const randomHigh = baseTemp + seasonalOffset + (Math.random() * 6 - 3);
     const randomLow = randomHigh - 5 - Math.random() * 5;
     
-    // Weather conditions
     const conditions = ['01d', '02d', '03d', '04d', '09d', '10d', '11d', '13d'];
     const weights = [0.3, 0.2, 0.15, 0.1, 0.1, 0.08, 0.05, 0.02];
     
-    // Adjust for season
     let icon;
     const rand = Math.random();
     let cumulative = 0;
@@ -764,25 +660,18 @@ function navigateMonth(direction) {
     updateMonthlyCalendar();
 }
 
-// ==========================================
-// AI Prediction Functions
-// ==========================================
 
 function updateAIPrediction() {
     if (!weatherData || !forecastData) return;
     
     const t = translations[currentLang];
     
-    // Generate extended forecast (2 weeks)
     generateExtendedForecast();
     
-    // Generate weather trends analysis
     generateWeatherTrends();
     
-    // Generate weather alerts
     generateWeatherAlerts();
     
-    // Generate recommendations
     generateRecommendations();
 }
 
@@ -816,7 +705,6 @@ function generateWeatherTrends() {
     
     let analysis = '';
     
-    // Temperature trend
     if (temp > 30) {
         analysis += t.weatherHot + ' ';
     } else if (temp < 10) {
@@ -825,12 +713,10 @@ function generateWeatherTrends() {
         analysis += t.weatherGood + ' ';
     }
     
-    // Precipitation trend
     if (description.includes('rain') || description.includes('drizzle')) {
         analysis += t.weatherRain;
     }
     
-    // Add humidity info
     if (humidity > 80) {
         analysis += ` ${t.humidity}: ${humidity}% (High)`;
     }
@@ -846,24 +732,20 @@ function generateWeatherAlerts() {
     const wind = weatherData.wind.speed;
     const description = weatherData.weather[0].main.toLowerCase();
     
-    // Temperature alerts
     if (temp > 35) {
         alerts.push({ type: 'danger', icon: 'fa-temperature-high', message: 'Extreme heat warning! Stay hydrated and avoid prolonged sun exposure.' });
     } else if (temp < 0) {
         alerts.push({ type: 'warning', icon: 'fa-temperature-low', message: 'Freezing temperatures! Watch out for ice and dress warmly.' });
     }
     
-    // Wind alerts
     if (wind > 15) {
         alerts.push({ type: 'warning', icon: 'fa-wind', message: 'Strong winds expected. Secure loose objects outdoors.' });
     }
     
-    // Storm alerts
     if (description.includes('thunder') || description.includes('storm')) {
         alerts.push({ type: 'danger', icon: 'fa-bolt', message: 'Thunderstorm warning! Stay indoors and away from windows.' });
     }
     
-    // Rain alerts
     if (description.includes('rain') || description.includes('drizzle')) {
         alerts.push({ type: 'info', icon: 'fa-umbrella', message: 'Rain expected. Don\'t forget your umbrella!' });
     }
@@ -888,7 +770,6 @@ function generateRecommendations() {
     const description = weatherData.weather[0].main.toLowerCase();
     const humidity = weatherData.main.humidity;
     
-    // Clothing recommendations
     if (temp < 10) {
         recommendations.push({ icon: 'fa-jacket', message: t.wearCold });
     } else if (temp > 28) {
@@ -899,17 +780,14 @@ function generateRecommendations() {
         recommendations.push({ icon: 'fa-shirt', message: t.wearMild });
     }
     
-    // Activity recommendations
     if (temp >= 15 && temp <= 28 && !description.includes('rain')) {
         recommendations.push({ icon: 'fa-person-walking', message: t.outdoorActivities || 'Great weather for outdoor activities!' });
     }
     
-    // Health recommendations
     if (temp > 30 || humidity > 80) {
         recommendations.push({ icon: 'fa-bottle-water', message: t.stayHydrated || 'Stay hydrated! Drink plenty of water.' });
     }
     
-    // UV recommendations
     if (description.includes('clear') || description.includes('sun')) {
         recommendations.push({ icon: 'fa-sun', message: t.wearSunscreen || 'Don\'t forget sunscreen if going outdoors!' });
     }
@@ -922,9 +800,6 @@ function generateRecommendations() {
     `).join('');
 }
 
-// ==========================================
-// Weather Map Functions
-// ==========================================
 
 function handleMapTabClick(tab) {
     document.querySelectorAll('.map-tab').forEach(t => t.classList.remove('active'));
@@ -950,9 +825,6 @@ function updateWeatherMap(type) {
     elements.weatherMap.src = `https://tile.openweathermap.org/map/${layer}/${zoom}/${x}/${y}.png?appid=${API_KEY}`;
 }
 
-// ==========================================
-// Search Functions
-// ==========================================
 
 async function handleSearch() {
     const query = elements.citySearch.value.trim();
@@ -967,7 +839,6 @@ async function handleSearch() {
         currentLon = location.lon;
         currentCity = location.name;
         
-        // Save to recent searches
         saveRecentSearch({
             name: location.name,
             country: location.country,
@@ -981,9 +852,6 @@ async function handleSearch() {
     }
 }
 
-// ==========================================
-// Autocomplete Suggestions Functions
-// ==========================================
 
 function handleSearchInput(e) {
     const query = e.target.value.trim();
@@ -1049,7 +917,6 @@ function showSuggestions(query) {
     
     let html = '';
     
-    // Show recent searches if no query or short query
     if (query.length < 2 && recentSearches.length > 0) {
         html += `<li class="suggestions-header"><i class="fas fa-history"></i> Recent Searches</li>`;
         html += recentSearches.map((item, index) => `
@@ -1071,7 +938,6 @@ function showSuggestions(query) {
     }
     
     if (results.length === 0) {
-        // Show recent searches even when no results found
         if (recentSearches.length > 0) {
             html += `<li class="no-suggestions">
                 <i class="fas fa-search"></i>
@@ -1119,7 +985,6 @@ function showSuggestions(query) {
             `;
         }).join('');
         
-        // Add click handlers to suggestion items
         elements.suggestionsList.querySelectorAll('.suggestion-item').forEach((item, index) => {
             item.addEventListener('click', () => {
                 selectSuggestion(currentSuggestions[index]);
@@ -1156,9 +1021,6 @@ function escapeRegex(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// ==========================================
-// Recent Searches Functions
-// ==========================================
 
 function loadRecentSearches() {
     try {
@@ -1173,18 +1035,15 @@ function loadRecentSearches() {
 }
 
 function saveRecentSearch(cityData) {
-    // Check if already exists
     const existingIndex = recentSearches.findIndex(
         item => item.name.toLowerCase() === cityData.name.toLowerCase() && 
                 item.country === cityData.country
     );
     
-    // Remove if exists (to move to top)
     if (existingIndex !== -1) {
         recentSearches.splice(existingIndex, 1);
     }
     
-    // Add to beginning
     recentSearches.unshift({
         name: cityData.name,
         country: cityData.country,
@@ -1192,12 +1051,10 @@ function saveRecentSearch(cityData) {
         lon: cityData.lon
     });
     
-    // Keep only last MAX_RECENT_SEARCHES
     if (recentSearches.length > MAX_RECENT_SEARCHES) {
         recentSearches = recentSearches.slice(0, MAX_RECENT_SEARCHES);
     }
     
-    // Save to localStorage
     try {
         localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
     } catch (e) {
@@ -1212,15 +1069,12 @@ function removeRecentSearch(index) {
     } catch (e) {
         console.error('Error saving recent searches:', e);
     }
-    // Refresh suggestions
     showSuggestions(elements.citySearch.value.trim());
 }
 
 function addRecentSearchHandlers() {
-    // Add click handlers for recent items
     elements.suggestionsList.querySelectorAll('.recent-item').forEach((item) => {
         item.addEventListener('click', (e) => {
-            // Don't trigger if clicking remove button
             if (e.target.closest('.remove-recent')) return;
             
             const index = parseInt(item.dataset.recentIndex);
@@ -1236,7 +1090,6 @@ function addRecentSearchHandlers() {
         });
     });
     
-    // Add click handlers for remove buttons
     elements.suggestionsList.querySelectorAll('.remove-recent').forEach((btn) => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -1256,7 +1109,6 @@ function getUserLocation() {
                 showToast(translations[currentLang].successLocation, 'success');
             },
             (error) => {
-                // Silently fail - user can search manually
                 console.log('Location access denied or unavailable');
             },
             { timeout: 10000 }
@@ -1264,9 +1116,6 @@ function getUserLocation() {
     }
 }
 
-// ==========================================
-// Voice Recognition Functions
-// ==========================================
 
 let recognition = null;
 
@@ -1348,9 +1197,6 @@ function closeVoiceOverlay() {
     }
 }
 
-// ==========================================
-// Text-to-Speech Functions
-// ==========================================
 
 function speakMessage(button) {
     if (!('speechSynthesis' in window)) {
@@ -1389,9 +1235,6 @@ function toggleVoiceMode() {
     }
 }
 
-// ==========================================
-// Chatbot Functions
-// ==========================================
 
 function toggleChatbot() {
     elements.chatbotWindow.classList.toggle('active');
@@ -1406,23 +1249,18 @@ function sendChatMessage() {
     const message = elements.chatInput.value.trim();
     if (!message) return;
     
-    // Add user message
     addChatMessage(message, 'user');
     elements.chatInput.value = '';
     
-    // Check if user asked about a specific city
     const extractedCity = extractCityFromMessage(message);
     if (extractedCity && extractedCity !== weatherData?.name) {
-        // Search for the city and load its weather
         searchCity(extractedCity);
     }
     
-    // Generate AI response
     setTimeout(() => {
         const response = generateChatResponse(message);
         addChatMessage(response, 'bot');
         
-        // Speak response if voice mode is enabled
         if (voiceMode) {
             speakText(response);
         }
@@ -1463,7 +1301,6 @@ function addChatMessage(message, type) {
 function extractCityFromMessage(message) {
     const lowerMessage = message.toLowerCase();
     
-    // Common patterns for city queries
     const patterns = [
         /in\s+([a-zA-Z\s]+?)(?:\s*\?|$)/i,
         /(?:weather|forecast)\s+(?:in|for|at|of)\s+([a-zA-Z\s]+?)(?:\s*\?|$)/i,
@@ -1483,7 +1320,6 @@ function extractCityFromMessage(message) {
     
     if (!extractedCity) return null;
     
-    // Search for the city in cities database
     const cityLower = extractedCity.toLowerCase();
     
     for (let cityData of citiesDatabase) {
@@ -1501,7 +1337,6 @@ function generateChatResponse(message) {
     const t = translations[currentLang];
     const lowerMessage = message.toLowerCase();
     
-    // Try to extract city from message
     const extractedCity = extractCityFromMessage(message);
     
     if (!weatherData) {
@@ -1509,7 +1344,6 @@ function generateChatResponse(message) {
     }
     
     const temp = weatherData.main.temp;
-    // Translate weather description for unsupported languages
     let description = weatherData.weather[0].description;
     if (typeof getWeatherDescription === 'function') {
         description = getWeatherDescription(description, currentLang);
@@ -1519,13 +1353,11 @@ function generateChatResponse(message) {
     const feelsLike = weatherData.main.feels_like;
     const wind = weatherData.wind.speed;
     
-    // Weather today
     if (lowerMessage.includes('today') || lowerMessage.includes('weather') || lowerMessage.includes('now') || 
         lowerMessage.includes('current') || lowerMessage.includes('आज') || lowerMessage.includes('இன்று')) {
         return `The current weather in ${city} is ${description} with a temperature of ${Math.round(temp)}°C. It feels like ${Math.round(feelsLike)}°C with ${humidity}% humidity.`;
     }
     
-    // Rain forecast
     if (lowerMessage.includes('rain') || lowerMessage.includes('umbrella') || lowerMessage.includes('बारिश') || 
         lowerMessage.includes('மழை') || lowerMessage.includes('lluvia') || lowerMessage.includes('pluie')) {
         const willRain = description.includes('rain') || description.includes('drizzle') || description.includes('thunderstorm');
@@ -1536,7 +1368,6 @@ function generateChatResponse(message) {
         }
     }
     
-    // What to wear
     if (lowerMessage.includes('wear') || lowerMessage.includes('clothes') || lowerMessage.includes('dress') ||
         lowerMessage.includes('पहन') || lowerMessage.includes('அணி') || lowerMessage.includes('vestir')) {
         if (temp < 10) return t.wearCold;
@@ -1545,37 +1376,29 @@ function generateChatResponse(message) {
         return t.wearMild;
     }
     
-    // Temperature
     if (lowerMessage.includes('temperature') || lowerMessage.includes('temp') || lowerMessage.includes('hot') || 
         lowerMessage.includes('cold') || lowerMessage.includes('तापमान') || lowerMessage.includes('வெப்பநிலை')) {
         return `The current temperature in ${city} is ${Math.round(temp)}°C and it feels like ${Math.round(feelsLike)}°C.`;
     }
     
-    // Humidity
     if (lowerMessage.includes('humidity') || lowerMessage.includes('humid') || lowerMessage.includes('आर्द्रता') || 
         lowerMessage.includes('ஈரப்பதம்')) {
         return `The humidity in ${city} is currently ${humidity}%. ${humidity > 70 ? 'It feels quite humid.' : 'The air is relatively comfortable.'}`;
     }
     
-    // Wind
     if (lowerMessage.includes('wind') || lowerMessage.includes('windy') || lowerMessage.includes('हवा') || 
         lowerMessage.includes('காற்று')) {
         return `The wind speed in ${city} is ${Math.round(wind * 3.6)} km/h. ${wind > 10 ? 'It\'s quite windy today!' : 'It\'s relatively calm.'}`;
     }
     
-    // Week forecast
     if (lowerMessage.includes('week') || lowerMessage.includes('forecast') || lowerMessage.includes('next') ||
         lowerMessage.includes('हफ्ते') || lowerMessage.includes('வாரம்')) {
         return `Based on the forecast for ${city}, expect varied conditions this week. Check the 7-day forecast panel for detailed information including temperatures and conditions for each day.`;
     }
     
-    // Generic response
     return `In ${city}, it's currently ${Math.round(temp)}°C with ${description}. Humidity is at ${humidity}%. Is there anything specific you'd like to know about the weather?`;
 }
 
-// ==========================================
-// Utility Functions
-// ==========================================
 
 function getLangCode() {
     const langCodes = {
@@ -1598,14 +1421,12 @@ function estimateUVIndex(data) {
     const hour = new Date().getHours();
     const t = translations[currentLang];
     
-    // Base UV based on time of day
     let baseUV;
     if (hour < 6 || hour > 20) baseUV = 0;
     else if (hour < 8 || hour > 18) baseUV = 2;
     else if (hour < 10 || hour > 16) baseUV = 5;
     else baseUV = 8;
     
-    // Adjust for clouds
     const cloudFactor = 1 - (clouds / 100) * 0.5;
     const uv = Math.round(baseUV * cloudFactor);
     
@@ -1649,5 +1470,4 @@ function showToast(message, type = 'info') {
     }, 4000);
 }
 
-// Make speakMessage globally available
 window.speakMessage = speakMessage;

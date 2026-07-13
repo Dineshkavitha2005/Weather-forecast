@@ -1,6 +1,6 @@
-/* auth.css - Authentication Pages Styles */
 
-/* Auth Body */
+
+
 .auth-body {
     min-height: 100vh;
     display: flex;
@@ -123,7 +123,7 @@
     }
 }
 
-/* Auth Container */
+
 .auth-container {
     display: flex;
     gap: var(--spacing-2xl);
@@ -135,7 +135,7 @@
     margin: auto;
 }
 
-/* Auth Card */
+
 .auth-card {
     width: 100%;
     max-width: 450px;
@@ -150,7 +150,7 @@
     flex-shrink: 0;
 }
 
-/* Logo */
+
 .auth-logo {
     text-align: center;
     margin-bottom: var(--spacing-xl);
@@ -173,7 +173,7 @@
     font-size: 0.9rem;
 }
 
-/* Auth Tabs */
+
 .auth-tabs {
     display: flex;
     gap: var(--spacing-sm);
@@ -210,7 +210,7 @@
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
-/* Auth Form */
+
 .auth-form {
     display: none;
 }
@@ -225,7 +225,7 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Form Groups */
+
 .form-group {
     margin-bottom: var(--spacing-md);
 }
@@ -272,7 +272,7 @@
     box-shadow: 0 0 0 3px rgba(2, 119, 189, 0.2);
 }
 
-/* Password Input */
+
 .password-input {
     position: relative;
 }
@@ -298,7 +298,7 @@
     color: #333;
 }
 
-/* Password Strength */
+
 .password-strength {
     height: 4px;
     background: rgba(0, 0, 0, 0.1);
@@ -330,7 +330,7 @@
     margin-top: var(--spacing-xs);
 }
 
-/* Form Options */
+
 .form-options {
     display: flex;
     justify-content: space-between;
@@ -340,7 +340,7 @@
     gap: var(--spacing-sm);
 }
 
-/* Checkbox */
+
 .checkbox-label {
     display: flex;
     align-items: center;
@@ -399,7 +399,7 @@
     text-decoration: underline;
 }
 
-/* Auth Button */
+
 .auth-btn {
     width: 100%;
     padding: var(--spacing-md);
@@ -430,7 +430,7 @@
     transform: translateY(0);
 }
 
-/* Divider */
+
 .divider {
     display: flex;
     align-items: center;
@@ -451,7 +451,7 @@
     font-size: 0.85rem;
 }
 
-/* Social Login */
+
 .social-login {
     display: flex;
     justify-content: center;
@@ -495,7 +495,7 @@
     border-color: #000;
 }
 
-/* Forgot Password Form */
+
 .back-btn {
     color: #666;
     font-size: 0.9rem;
@@ -536,7 +536,7 @@
     margin-bottom: var(--spacing-xl);
 }
 
-/* Success Message */
+
 .auth-success {
     display: none;
     text-align: center;
@@ -573,7 +573,7 @@
     margin-bottom: var(--spacing-xl);
 }
 
-/* Features Section */
+
 .auth-features {
     max-width: 350px;
     color: #1a1a1a;
@@ -633,7 +633,7 @@
     color: #333;
 }
 
-/* User Profile Button (for main app) */
+
 .user-profile-btn {
     display: flex;
     align-items: center;
@@ -671,7 +671,7 @@
     white-space: nowrap;
 }
 
-/* User Dropdown */
+
 .user-dropdown {
     position: relative;
 }
@@ -729,7 +729,7 @@
     color: var(--danger);
 }
 
-/* Responsive */
+
 @media (max-width: 900px) {
     .auth-container {
         flex-direction: column;
@@ -781,7 +781,7 @@
     }
 }
 
-/* Ensure scrolling works on all screen sizes */
+
 @media (max-height: 800px) {
     .auth-body {
         align-items: flex-start;
